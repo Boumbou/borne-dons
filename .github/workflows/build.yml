@@ -1,9 +1,9 @@
 name: Flutter Desktop Builds
 
 on:
-  push:
-    branches:
-      - main # Triggers automatically when you push to main
+  # push:
+  #   branches:
+  #     - main # Triggers automatically when you push to main
   workflow_dispatch: # Allows you to manually click a "Run" button in GitHub
 
 jobs:
@@ -51,7 +51,7 @@ jobs:
         # Linux requires these native C++ and GTK dependencies to compile Flutter
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
