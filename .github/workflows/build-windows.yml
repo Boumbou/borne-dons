@@ -1,0 +1,39 @@
+name: Flutter Windows Builds
+
+on:
+  # push:
+  #   branches:
+  #     - main # Triggers automatically when you push to main
+  workflow_dispatch: # Allows you to manually click a "Run" button in GitHub
+
+jobs:
+  # ==========================================
+  # WINDOWS BUILD JOB
+  # ==========================================
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Windows App
+        run: flutter build windows
+
+      - name: Upload Windows Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-release
+          # This folder contains your .exe and all required DLLs/data
+          path: build/windows/x64/runner/Release/
+
+  
