@@ -13,6 +13,10 @@ class AppConstants {
   /// Formats the Stripe Terminal Reader process payment intent URL.
   static String processPaymentEndpoint(String readerId) => 
       '$stripeBaseUrl/terminal/readers/$readerId/process_payment_intent';
+  
+  /// Formats the Stripe Test Helper payment intent URL.
+  static String simulateCardTap(String readerId) => 
+      '$stripeBaseUrl/test_helpers/terminal/readers/$readerId/present_payment_method';
 
   /// Formats the Stripe Terminal Reader capture/retrieve URL for polling.
   static String readerEndpoint(String readerId) =>
