@@ -40,6 +40,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   bool _isTestMode = false;
   String _associationName = 'Votre nom d\'association';
   String _shortText = 'Soutenez notre association. Chaque contribution fait la différence.';
+  Color? _brandColor;
 
   @override
   void initState() {
@@ -55,6 +56,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _isTestMode = widget.storageService.isTestMode();
       _associationName = widget.storageService.getAssociationName();
       _shortText = widget.storageService.getShortText();
+      _brandColor = widget.storageService.getBrandColor() == null ?Color.fromARGB(255, 115, 176, 245) : Color(widget.storageService.getBrandColor()!);
     });
   }
 
@@ -128,10 +130,11 @@ class _PaymentScreenState extends State<PaymentScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // --- Layer 1: Mandated repeating background pattern ---
+          // --- Layer 1: repeating background pattern ---
           Positioned.fill(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration:  BoxDecoration(
+                color: _brandColor,
                 image: DecorationImage(
                   image: AssetImage(AppConstants.backgroundPattern),
                   repeat: ImageRepeat.repeat,

@@ -17,6 +17,7 @@ class StorageService {
   
   // --- Shared Preferences Keys ---
   static const String _keyLogoPath = 'company_logo_path';
+  static const String _keyBrandColor = 'brand_color';
   static const String _keyIsMockMode = 'pos_is_mock_mode';
   static const String _keyIsTestMode = 'pos_is_test_mode';
   static const String _keyAssociationName = 'association_name';
@@ -60,6 +61,15 @@ class StorageService {
   /// Writes the Stripe Terminal Reader ID securely.
   Future<void> setTerminalId(String terminalId) async {
     await _secureStorage.write(key: _keyTerminalId, value: terminalId);
+  }
+
+  // --- Brand Color operations ---
+  int? getBrandColor(){
+    return _prefs.getInt(_keyBrandColor);
+  }
+
+  Future<bool> setBrandColor(int colorValue){
+    return _prefs.setInt(_keyBrandColor, colorValue);
   }
 
   // --- Company Logo Operations ---

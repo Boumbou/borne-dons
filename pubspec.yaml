@@ -40,6 +40,7 @@ dependencies:
   path: ^1.9.1
   http: ^1.6.0
   image_picker: ^1.2.3
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -66,6 +67,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/pattern-background-normal.jpg
+    - assets/background-pattern.png
     - assets/basmalah.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

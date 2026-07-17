@@ -55,5 +55,5 @@ class AppConstants {
   static const Color error = Color(0xFFEF4444); // red-500
   
   // --- Asset Paths ---
-  static const String backgroundPattern = 'assets/pattern-background-normal.jpg';
+  static const String backgroundPattern = 'assets/background-pattern.png';
 }

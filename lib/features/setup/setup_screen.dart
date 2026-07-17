@@ -37,6 +37,7 @@ class _SetupScreenState extends State<SetupScreen> {
   bool _isMockMode = false;
   bool _isTestMode = false;
   bool _isLoading = false;
+  Color? _brandColor;
 
   @override
   void initState() {
@@ -61,6 +62,7 @@ class _SetupScreenState extends State<SetupScreen> {
       _shortTextController.text = shortText;
       _isMockMode = isMock;
       _isTestMode = isTest;
+      _brandColor = widget.storageService.getBrandColor() == null ?Color.fromARGB(255, 115, 176, 245) : Color(widget.storageService.getBrandColor()!);
       if (logoPath != null && logoPath.isNotEmpty) {
         _logoFile = File(logoPath);
       }
@@ -166,7 +168,8 @@ class _SetupScreenState extends State<SetupScreen> {
     return Scaffold(
       body: Container(
         // Repeating background pattern as mandated by design specifications
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
+          color: _brandColor,
           image: DecorationImage(
             image: AssetImage(AppConstants.backgroundPattern),
             repeat: ImageRepeat.repeat,

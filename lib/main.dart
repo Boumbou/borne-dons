@@ -52,7 +52,7 @@ class StripePOSApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stripe Terminal POS',
+      title: 'Borne de dons',
       debugShowCheckedModeBanner: false,
       
       // Apply professional Shadcn visual theme custom specs
