@@ -222,7 +222,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       ),
 
                       // Space for sticky bottom stepper
-                      const SizedBox(height: 104.0),
+                      const SizedBox(height: 160.0),
                     ],
                   ),
                 ),
