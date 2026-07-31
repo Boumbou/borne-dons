@@ -10,6 +10,9 @@ class AppConstants {
   static const String stripeBaseUrl = 'https://api.stripe.com/v1';
   static const String paymentIntentsEndpoint = '$stripeBaseUrl/payment_intents';
   
+  // --- Sumup API Endpoints ---
+  static const String sumupBaseUrl = 'https://api.sumup.com/v0.1/merchants';
+  
   /// Formats the Stripe Terminal Reader process payment intent URL.
   static String processPaymentEndpoint(String readerId) => 
       '$stripeBaseUrl/terminal/readers/$readerId/process_payment_intent';

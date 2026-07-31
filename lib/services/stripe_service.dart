@@ -58,7 +58,7 @@ class StripeService {
         },
       );
 
-      //Cath intent error
+      //Catch intent error
       if (intentResponse.statusCode != 200) {
         final errorBody = jsonDecode(intentResponse.body);
         throw Exception('Impossible d\'initier le paiement: ${errorBody['error']?['message'] ?? intentResponse.body}');
@@ -95,6 +95,7 @@ class StripeService {
 
       onStatusUpdate?.call('Terminal activé. Presentez votre carte...');
 
+      //simulate payment with stripe
       if(isTest){
         final testPaymentUrl = AppConstants.simulateCardTap(readerId);
         final presentSimulatedCard = await _client.post(

@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import '../../core/constants.dart';
 import '../../services/storage_service.dart';
 import '../../services/stripe_service.dart';
+import '../../services/sumup_service.dart';
 import '../setup/setup_screen.dart';
 import 'widgets/amount_grid.dart';
 import 'widgets/custom_stepper.dart';
@@ -21,10 +22,12 @@ import 'widgets/payment_dialog.dart';
 
 class PaymentScreen extends StatefulWidget {
   final StorageService storageService;
+  final SumupService sumupService;
 
   const PaymentScreen({
     Key? key,
     required this.storageService,
+    required this.sumupService,
   }) : super(key: key);
 
   @override
@@ -33,11 +36,13 @@ class PaymentScreen extends StatefulWidget {
 
 class _PaymentScreenState extends State<PaymentScreen> {
   final StripeService _stripeService = StripeService();
+  final SumupService _sumupService = SumupService();
   
   int _currentCheckoutStep = 1; // 1 = Select, 2 = Processing, 3 = Approved
   String? _logoFilePath;
   bool _isMockMode = false;
   bool _isTestMode = false;
+  bool _isStripe = false;
   String _associationName = 'Votre nom d\'association';
   String _shortText = 'Soutenez notre association. Chaque contribution fait la différence.';
   Color? _brandColor;
@@ -54,6 +59,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _logoFilePath = widget.storageService.getLogoPath();
       _isMockMode = widget.storageService.isMockMode();
       _isTestMode = widget.storageService.isTestMode();
+      _isStripe = widget.storageService.isStripe();
       _associationName = widget.storageService.getAssociationName();
       _shortText = widget.storageService.getShortText();
       _brandColor = widget.storageService.getBrandColor() == null ?Color.fromARGB(255, 115, 176, 245) : Color(widget.storageService.getBrandColor()!);
@@ -95,6 +101,69 @@ class _PaymentScreenState extends State<PaymentScreen> {
       },
     );
 
+    setState((){
+      _currentCheckoutStep= 3;
+    });
+
+    // Close the logging stream
+    await statusStreamController.close();
+
+    if (wasCaptured == true) {
+      // Transition UI to Step 3 (Approved & Finalized)
+      setState(() {
+        _currentCheckoutStep = 3;
+      });
+
+      // Display approval message or let the success state persist briefly
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    // Reset workflow to Step 1 (Awaiting selection)
+    if (mounted) {
+      setState(() {
+        _currentCheckoutStep = 1;
+      });
+    }
+  }
+  
+  
+  //Sumup checkout
+  Future<void> _initiateSumupTransaction(double amount) async {
+    // Transition UI to Step 2 (Processing)
+    setState(() {
+      _currentCheckoutStep = 2;
+    });
+
+    // We instantiate a stream controller to broadcast direct status changes
+    // from StripeService straight into the dialog box console.
+    final StreamController<String> statusStreamController = StreamController<String>();
+
+    // Start the transaction future
+    final Future<Map<String, dynamic>> transactionFuture = _sumupService.startSoloCheckout(
+      amount: amount,
+      storage: widget.storageService,
+      onStatusUpdate: (message) {
+        statusStreamController.add(message);
+      },
+    );
+
+    // Launch Checkout Dialog Box
+    final bool? wasCaptured = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false, // Prevent backdrop tapping from breaking connection
+      builder: (context) {
+        return PaymentDialog(
+          amount: amount,
+          paymentFuture: transactionFuture,
+          statusStream: statusStreamController.stream,
+        );
+      },
+    );
+
+    setState((){
+      _currentCheckoutStep= 3;
+    });
+
     // Close the logging stream
     await statusStreamController.close();
 
@@ -120,7 +189,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   void _navigateToSettings() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => SetupScreen(storageService: widget.storageService),
+        builder: (context) => SetupScreen(storageService: widget.storageService, sumupService:widget.sumupService),
       ),
     );
   }
@@ -219,7 +288,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Padding(
                               padding: const EdgeInsets.all(28.0),
                               child: AmountGrid(
-                                onAmountSelected: _initiateTerminalTransaction,
+                                onAmountSelected: _isStripe ? _initiateTerminalTransaction : _initiateSumupTransaction,
                               ),
                             ),
                       ),

@@ -12,14 +12,17 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/constants.dart';
 import '../../services/storage_service.dart';
+import '../../services/sumup_service.dart';
 import '../payment/payment_screen.dart';
 
 class SetupScreen extends StatefulWidget {
   final StorageService storageService;
+  final SumupService sumupService;
 
   const SetupScreen({
     Key? key,
     required this.storageService,
+    required this.sumupService,
   }) : super(key: key);
 
   @override
@@ -28,6 +31,11 @@ class SetupScreen extends StatefulWidget {
 
 class _SetupScreenState extends State<SetupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final _sumupMerchantCodeController = TextEditingController();
+  final _sumupApiKeyController = TextEditingController();
+  final _sumupAppIdController = TextEditingController();
+  final _sumupAfKeyController = TextEditingController();
+  final _sumupPairingCodeController = TextEditingController();
   final _secretKeyController = TextEditingController();
   final _terminalIdController = TextEditingController();
   final _associationNameController = TextEditingController();
@@ -36,6 +44,7 @@ class _SetupScreenState extends State<SetupScreen> {
   File? _logoFile;
   bool _isMockMode = false;
   bool _isTestMode = false;
+  bool _isStripe = false;
   bool _isLoading = false;
   Color? _brandColor;
 
@@ -47,21 +56,33 @@ class _SetupScreenState extends State<SetupScreen> {
 
   /// Prefills any existing settings if we are modifying credentials.
   Future<void> _loadExistingConfigurations() async {
+    final sumupMerchantCode = await widget.storageService.getSumupMerchantCode();
+    final sumupApiKey = await widget.storageService.getSumupApiKey();
+    final sumupAfKey = await widget.storageService.getSumupAfKey();
+    final sumupAppId = await widget.storageService.getSumupAppId();
+    final sumupPairingCode = await widget.storageService.getSumupPairingCode();
     final secret = await widget.storageService.getStripeSecretKey();
     final terminal = await widget.storageService.getTerminalId();
     final logoPath = widget.storageService.getLogoPath();
     final isMock = widget.storageService.isMockMode();
     final isTest = widget.storageService.isTestMode();
+    final isStripe = widget.storageService.isStripe();
     final associationName = widget.storageService.getAssociationName();
     final shortText = widget.storageService.getShortText();
 
     setState(() {
+      _sumupApiKeyController.text = sumupApiKey ?? '';
+      _sumupAppIdController.text = sumupAppId ?? '';
+      _sumupAfKeyController.text = sumupAfKey ?? '';
+      _sumupMerchantCodeController.text = sumupMerchantCode ?? '';
+      _sumupPairingCodeController.text = sumupPairingCode ?? '';
       _secretKeyController.text = secret ?? '';
       _terminalIdController.text = terminal ?? '';
       _associationNameController.text = associationName;
       _shortTextController.text = shortText;
       _isMockMode = isMock;
       _isTestMode = isTest;
+      _isStripe = isStripe;
       _brandColor = widget.storageService.getBrandColor() == null ?Color.fromARGB(255, 115, 176, 245) : Color(widget.storageService.getBrandColor()!);
       if (logoPath != null && logoPath.isNotEmpty) {
         _logoFile = File(logoPath);
@@ -90,6 +111,11 @@ class _SetupScreenState extends State<SetupScreen> {
     }
   }
 
+  // Try Pair Sumup reader and save reader id api key & merchant code
+  // Future<void> _handleSumupPairUp() async{
+  //   return;
+  // }
+
   /// Persists credentials and transitions state safely.
   Future<void> _handleSubmit() async {
     // If mock mode is selected, we bypass strict field validation
@@ -111,28 +137,67 @@ class _SetupScreenState extends State<SetupScreen> {
 
       // 2. Save Mock Mode
       await widget.storageService.setMockMode(_isMockMode);
-      // 2. Save Mock Mode
+      // 2. Save Payment Mode
+      await widget.storageService.setIsStripe(_isStripe);
+      // 2. Save Test Mode
       await widget.storageService.setTestMode(_isTestMode);
 
       // Save custom association fields
       await widget.storageService.setAssociationName(_associationNameController.text.trim());
       await widget.storageService.setShortText(_shortTextController.text.trim());
 
-      // 3. Save Stripe Keys
+      // 3. Save payment provider details
       if (!_isMockMode) {
-        await widget.storageService.setStripeSecretKey(_secretKeyController.text.trim());
-        await widget.storageService.setTerminalId(_terminalIdController.text.trim());
+        if(_isStripe){
+          //stripe
+          await widget.storageService.setStripeSecretKey(_secretKeyController.text.trim());
+          await widget.storageService.setTerminalId(_terminalIdController.text.trim());
+        }else{
+          //sumup
+          try{
+            final String? readerId = await widget.sumupService.pairSumupSolo(
+              _sumupMerchantCodeController.text.trim(),
+              _sumupApiKeyController.text.trim(),
+              _sumupPairingCodeController.text.trim()
+            );
+
+            if (readerId == null){
+              throw Exception('Impossible de coupler le terminal...');
+            }
+
+            await widget.storageService.setSumupReaderId(readerId);
+          }catch(e){
+            print('error while pairing sumup: $e');
+            return;
+          }
+
+          await widget.storageService.setSumupApiKey(_sumupApiKeyController.text.trim());
+          await widget.storageService.setSumupMerchantCode(_sumupMerchantCodeController.text.trim());
+          await widget.storageService.setSumupAppId(_sumupAppIdController.text.trim());
+          await widget.storageService.setSumupAfKey(_sumupAfKeyController.text.trim());
+          await widget.storageService.setSumupPairingCode(_sumupPairingCodeController.text.trim());
+
+        }
+
       } else {
         // Clear old production credentials in mock state
+        //sumup
+        await widget.storageService.setSumupApiKey('');
+        await widget.storageService.setSumupMerchantCode('');
+        await widget.storageService.setSumupPairingCode('');
+
+        //stripe
         await widget.storageService.setStripeSecretKey('');
         await widget.storageService.setTerminalId('');
       }
+      
+      
 
       // 4. Success Transition
       if (mounted) {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (context) => PaymentScreen(storageService: widget.storageService),
+            builder: (context) => PaymentScreen(storageService: widget.storageService, sumupService: widget.sumupService),
           ),
         );
       }
@@ -277,6 +342,7 @@ class _SetupScreenState extends State<SetupScreen> {
                           'Texte d\'appel aux dons (court)',
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
                         ),
+                        
                         const SizedBox(height: 8.0),
                         TextFormField(
                           controller: _shortTextController,
@@ -333,93 +399,293 @@ class _SetupScreenState extends State<SetupScreen> {
                         ),
                         const SizedBox(height: 24.0),
 
-
-                        // --- Integration test Toggle ---
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 101, 232, 188),
-                            borderRadius: BorderRadius.circular(8.0),
-                            border: Border.all(color: AppConstants.border, width: 1.0),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Mode test',
-                                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accentForeground),
-                                    ),
-                                    Text(
-                                      'Teste votre integration avec un terminal de test.',
-                                      style: TextStyle(fontSize: 11, color: AppConstants.accentForeground),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Switch(
-                                value: _isTestMode,
-                                activeColor: AppConstants.secondary,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _isTestMode = value;
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 24.0),
-
                         // --- Dynamic Form Fields ---
                         if (!_isMockMode) ...[
-                          // Stripe Secret Key
-                          const Text(
-                            'Stripe Secret API Key',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
-                          ),
-                          const SizedBox(height: 8.0),
-                          TextFormField(
-                            controller: _secretKeyController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              hintText: 'sk_...',
-                              prefixIcon: Icon(Icons.vpn_key_outlined, size: 16),
+                          // --- Is Stripe or Sumup Toggle ---
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 57, 61, 60),
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: AppConstants.border, width: 1.0),
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Saisissez votre clé Stripe';
-                              }
-                              if (!value.startsWith('sk_')) {
-                                return 'Saisissez une clé valide qui commence par sk_';
-                              }
-                              return null;
-                            },
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Service de paiement',
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accent),
+                                      ),
+                                      SizedBox(
+                                        height: 10.0,
+                                      ),
+                                      Image.asset(
+                                        _isStripe ? 'assets/hd-stripe-white-logo.png' : 'assets/Sumup_logo-white.png',
+                                        height: 30.0,
+                                      ),
+                                      // Text(
+                                      //   _isStripe ? 'Stripe' : 'Sumup',
+                                      //   style: TextStyle(fontSize: 18, color: AppConstants.accent, fontStyle: FontStyle.italic),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: _isStripe,
+                                  activeColor: AppConstants.secondary,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isStripe = value;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
-                          const SizedBox(height: 20.0),
+                          const SizedBox(height: 24.0),
+                          
+                          // --- Integration test Toggle ---
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 101, 232, 188),
+                              borderRadius: BorderRadius.circular(8.0),
+                              border: Border.all(color: AppConstants.border, width: 1.0),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'Mode test',
+                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accentForeground),
+                                      ),
+                                      Text(
+                                        'Teste votre integration avec un terminal de test.',
+                                        style: TextStyle(fontSize: 11, color: AppConstants.accentForeground),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Switch(
+                                  value: _isTestMode,
+                                  activeColor: AppConstants.secondary,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _isTestMode = value;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24.0),
 
-                          // Stripe Terminal ID
-                          const Text(
-                            'Stripe Terminal Reader ID',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                          DefaultTabController(
+                            length: 2,
+                            initialIndex: _isStripe ? 0 : 1,
+                            child: 
+                              Column(
+                                children:<Widget>[
+                                  TabBar(
+                                    indicatorWeight: 10.0,
+                                    indicatorColor: _brandColor,
+                                    tabs: [
+                                      Tab(text: 'Stripe',),
+                                      Tab(text: 'Sumup')
+                                    ]
+                                  ),
+                                  SizedBox(
+                                    height: MediaQuery.of(context).size.height * 0.6,
+                                    child:TabBarView(
+                                      children: [
+                                      //--- stripe config form ---
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children:[
+                                          SizedBox(height: 30.0),
+                                          Text(
+                                            'Stripe Secret API Key',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _secretKeyController,
+                                            obscureText: true,
+                                            decoration:  InputDecoration(
+                                              hintText: 'sk_...',
+                                              prefixIcon: Icon(Icons.vpn_key_outlined, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez votre clé Stripe';
+                                              }
+                                              if (!value.startsWith('sk_')) {
+                                                return 'Saisissez une clé valide qui commence par sk_';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 20.0),
+
+                                          // Stripe Terminal ID
+                                          Text(
+                                            'Stripe Terminal Reader ID',
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _terminalIdController,
+                                            decoration: const InputDecoration(
+                                              hintText: 'tmr_...',
+                                              prefixIcon: Icon(Icons.chrome_reader_mode_outlined, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez l\id de votre terminal Stripe';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          
+                                          SizedBox(height: 32.0),
+                                        ]
+                                      ),
+
+                                      //--- Sumup config form ---
+                                      Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children:[
+                                          SizedBox(height: 30.0),
+                                          Text(
+                                            'Code commerçant Sumup',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _sumupMerchantCodeController,
+                                            // obscureText: true,
+                                            decoration:  InputDecoration(
+                                              hintText: 'code commerçant...',
+                                              prefixIcon: Icon(Icons.store, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez votre code commerçant';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 20.0),
+                                          Text(
+                                            'Sumup API Key',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _sumupApiKeyController,
+                                            obscureText: true,
+                                            decoration:  InputDecoration(
+                                              hintText: 'sup_sk...',
+                                              prefixIcon: Icon(Icons.vpn_key_outlined, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez votre clé Sumup';
+                                              }
+                                              if (!value.startsWith('sup_sk_')) {
+                                                return 'Saisissez une clé valide';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 20.0),
+                                          Text(
+                                            'Identifiant d\'application Sumup',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _sumupAppIdController,
+                                            decoration:  InputDecoration(
+                                              hintText: 'id application...',
+                                              prefixIcon: Icon(Icons.vpn_key_outlined, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez votre identifiant d\'application';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 20.0),
+                                          Text(
+                                            'Clé d\'affiliation Sumup',
+                                            textAlign: TextAlign.start,
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _sumupAfKeyController,
+                                            obscureText: true,
+                                            decoration:  InputDecoration(
+                                              hintText: 'sup_afk...',
+                                              prefixIcon: Icon(Icons.vpn_key_outlined, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez votre clé Sumup';
+                                              }
+                                              if (!value.startsWith('sup_afk_')) {
+                                                return 'Saisissez une clé valide';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 20.0),
+
+                                          // Stripe Terminal ID
+                                          Text(
+                                            'Paircode Sumup',
+                                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppConstants.foreground),
+                                          ),
+
+                                          SizedBox(height: 8.0),
+                                          TextFormField(
+                                            controller: _sumupPairingCodeController,
+                                            decoration: const InputDecoration(
+                                              hintText: 'pairng code...',
+                                              prefixIcon: Icon(Icons.add_link, size: 16),
+                                            ),
+                                            validator: (value) {
+                                              if (value == null || value.trim().isEmpty) {
+                                                return 'Saisissez le pair code généré depuis votre terminal Sumup';
+                                              }
+                                              return null;
+                                            },
+                                          ),
+                                          SizedBox(height: 32.0),
+                                          
+                                        ]
+                                      ),
+                                        
+                                      ]
+                                    ),
+                                  )
+                                ]
+                              )
                           ),
-                          const SizedBox(height: 8.0),
-                          TextFormField(
-                            controller: _terminalIdController,
-                            decoration: const InputDecoration(
-                              hintText: 'tmr_...',
-                              prefixIcon: Icon(Icons.chrome_reader_mode_outlined, size: 16),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Saisissez l\id de votre terminal Stripe';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 32.0),
+                        
                         ] else ...[
                           const SizedBox(height: 16.0),
                         ],
