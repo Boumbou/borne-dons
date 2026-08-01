@@ -27,7 +27,7 @@ class AppConstants {
 
   // --- Quick Select Amounts ---
   // Represented in dollars (will be converted to cents for Stripe API)
-  static const List<double> quickAmounts = [5.0, 10.0, 20.0, 30.0, 50.0];
+  static const List<double> quickAmounts = [10.0, 20.0, 30.0, 40.0, 50.0];
 
   // --- Shadcn-Style Slate Color Palette ---
   // Minimalist, high-contrast colors mirroring a professional slate-based theme.

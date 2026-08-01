@@ -46,6 +46,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
   String _associationName = 'Votre nom d\'association';
   String _shortText = 'Soutenez notre association. Chaque contribution fait la différence.';
   Color? _brandColor;
+  Color? _textColor;
+  bool? _isThemeDark = true;
 
   @override
   void initState() {
@@ -63,6 +65,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
       _associationName = widget.storageService.getAssociationName();
       _shortText = widget.storageService.getShortText();
       _brandColor = widget.storageService.getBrandColor() == null ?Color.fromARGB(255, 115, 176, 245) : Color(widget.storageService.getBrandColor()!);
+      _isThemeDark = ThemeData.estimateBrightnessForColor(_brandColor!) == Brightness.dark;
+      _textColor = _isThemeDark! ? Colors.white : AppConstants.accentForeground;
     });
   }
 
@@ -207,6 +211,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 image: DecorationImage(
                   image: AssetImage(AppConstants.backgroundPattern),
                   repeat: ImageRepeat.repeat,
+                  opacity: 0.5
                 ),
               ),
             ),
@@ -228,6 +233,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       Image.asset(
                         'assets/basmalah.png',
                         height: 100,
+                        color:  
+                          _isThemeDark! ? Colors.amber : Colors.amber[800],
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) {
                           // Clean visual fallback when the image doesn't exist in assets yet
@@ -266,10 +273,10 @@ class _PaymentScreenState extends State<PaymentScreen> {
                         child: Text(
                           _shortText,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 22.0,
                             height: 1.4,
-                            color: AppConstants.mutedForeground,
+                            color:  _textColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -288,7 +295,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Padding(
                               padding: const EdgeInsets.all(28.0),
                               child: AmountGrid(
-                                onAmountSelected: _isStripe ? _initiateTerminalTransaction : _initiateSumupTransaction,
+                                onAmountSelected: _isStripe || _isMockMode ? _initiateTerminalTransaction : _initiateSumupTransaction,
                               ),
                             ),
                       ),
@@ -324,20 +331,25 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     child: Row(
                       children: [
                         // Logo / Branding Node
-                        Container(
-                          height: 38,
-                          width: 38,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6.0),
-                            border: Border.all(color: AppConstants.border, width: 1.0),
-                          ),
-                          child: _logoFilePath != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(6.0),
-                                  child: Image.file(File(_logoFilePath!), fit: BoxFit.cover),
-                                )
-                              : const Icon(Icons.favorite_outline, color: AppConstants.primary, size: 20),
+                        GestureDetector(
+                          onLongPress: _navigateToSettings,
+                          behavior: HitTestBehavior.opaque,
+                          child:
+                            Container(
+                              height: 38,
+                              width: 38,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6.0),
+                                border: Border.all(color: AppConstants.border, width: 1.0),
+                              ),
+                              child: _logoFilePath != null
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(6.0),
+                                      child: Image.file(File(_logoFilePath!), fit: BoxFit.cover),
+                                    )
+                                  : const Icon(Icons.favorite_outline, color: AppConstants.primary, size: 20),
+                            )
                         ),
                         const SizedBox(width: 12.0),
 
@@ -365,7 +377,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                     width: 6,
                                     height: 6,
                                     decoration: BoxDecoration(
-                                      color: _isMockMode ? Colors.orange : AppConstants.success,
+                                      color: _isMockMode ? _isThemeDark! ? Colors.amber : Colors.amber[800] : _isThemeDark! ? Colors.tealAccent : Colors.teal[800],
                                       shape: BoxShape.circle,
                                     ),
                                   ),
@@ -385,13 +397,13 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ),
                         ),
 
-                        // Config Cog Action Button
-                        IconButton(
-                          onPressed: _navigateToSettings,
-                          icon: const Icon(Icons.settings_outlined, size: 18),
-                          color: AppConstants.foreground,
-                          tooltip: 'POS Settings',
-                        ),
+                        // // Config Cog Action Button
+                        // IconButton(
+                        //   onPressed: _navigateToSettings,
+                        //   icon: const Icon(Icons.settings_outlined, size: 18),
+                        //   color: AppConstants.foreground,
+                        //   tooltip: 'POS Settings',
+                        // ),
                       ],
                     ),
                   ),
@@ -419,7 +431,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                   alignment: Alignment.center,
                   child: SafeArea(
                     top: false,
-                    child: CustomStepper(currentStep: _currentCheckoutStep),
+                    child: CustomStepper(currentStep: _currentCheckoutStep, color:_brandColor!),
                   ),
                 ),
               ),

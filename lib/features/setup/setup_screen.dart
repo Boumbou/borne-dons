@@ -14,6 +14,8 @@ import '../../core/constants.dart';
 import '../../services/storage_service.dart';
 import '../../services/sumup_service.dart';
 import '../payment/payment_screen.dart';
+import '../colorpicker/colorpicker_dialog.dart';
+
 
 class SetupScreen extends StatefulWidget {
   final StorageService storageService;
@@ -88,6 +90,21 @@ class _SetupScreenState extends State<SetupScreen> {
         _logoFile = File(logoPath);
       }
     });
+  }
+
+  Future<void> _pickColor() async {
+    final Color? selectedColor = await showColorPickerDialog(
+      context: context,
+      initialColor: _brandColor!,
+    );
+
+    // If the user picked a color and didn't cancel, update the UI
+    if (selectedColor != null) {
+      await widget.storageService.setBrandColor(selectedColor.toARGB32());
+      setState(() {
+        _brandColor = selectedColor;
+      });
+    }
   }
 
   /// Triggers the device's file picker or gallery to choose a brand logo.
@@ -314,6 +331,19 @@ class _SetupScreenState extends State<SetupScreen> {
                               ),
                             ]
                           ],
+                        ),
+                        const SizedBox(height: 24.0),
+
+                        //color selection section
+                        const Text('Thème'),
+                        const SizedBox(height: 16.0),
+                        ElevatedButton(
+                          onPressed: _pickColor,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.lerp(_brandColor,Colors.black,0.2),
+                            textStyle: TextStyle(color:  Colors.white ), // Change
+                          ),
+                          child: Text('Sélectionnez une couleur'),
                         ),
                         const SizedBox(height: 24.0),
 
@@ -696,6 +726,10 @@ class _SetupScreenState extends State<SetupScreen> {
                           height: 48,
                           child: ElevatedButton(
                             onPressed: _isLoading ? null : _handleSubmit,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Color.lerp(_brandColor,Colors.black,0.2),
+                              textStyle: TextStyle(color:  Colors.white ), // Change
+                            ),
                             child: _isLoading
                                 ? const SizedBox(
                                     height: 20,

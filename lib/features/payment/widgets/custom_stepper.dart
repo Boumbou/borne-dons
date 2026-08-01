@@ -5,12 +5,15 @@
 import 'package:flutter/material.dart';
 import '../../../core/constants.dart';
 
+
 class CustomStepper extends StatelessWidget {
   final int currentStep; // 1, 2, or 3
+  final Color _color;
 
   const CustomStepper({
     Key? key,
     required this.currentStep,
+    required this._color
   }) : super(key: key);
 
   @override
@@ -51,7 +54,7 @@ class CustomStepper extends StatelessWidget {
     // Determine colors based on active/completed status
     final Color circleBgColor = isCompleted
         ? AppConstants.success
-        : (isActive ? AppConstants.primary : Colors.white);
+        : (isActive ? Color.lerp(_color,Colors.black,0.2)! : Colors.white);
     
     final Color circleBorderColor = isCompleted
         ? AppConstants.success
@@ -72,7 +75,7 @@ class CustomStepper extends StatelessWidget {
           height: 40,
           decoration: BoxDecoration(
             color: circleBgColor,
-            border: Border.all(color: circleBorderColor, width: 1.5),
+            border: Border.all(color: circleBgColor, width: 1.5),
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
