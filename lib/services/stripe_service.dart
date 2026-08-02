@@ -2,7 +2,7 @@
 ///
 /// This service encapsulates the direct integration with the Stripe Terminal Cloud API.
 /// Since this is a backend-less POS, the client handles request construction, headers,
-/// and polling directly. It also implements a realistic Mock Simulator for demonstrations
+/// and polling directly. It also implements a realistic Mock Simulation for demonstrations
 /// when mock mode is enabled or invalid keys are supplied.
 import 'dart:convert';
 import 'package:http/http.dart' as http;
@@ -25,6 +25,7 @@ class StripeService {
     void Function(String message)? onStatusUpdate,
   }) async {
     final isMock = storage.isMockMode();
+    final isTest = storage.isTestMode();
     final secretKey = await storage.getStripeSecretKey() ?? '';
     final readerId = await storage.getTerminalId() ?? '';
 
@@ -40,8 +41,9 @@ class StripeService {
       // ----------------------------------------------------
       // STEP 1: Create a Payment Intent
       // ----------------------------------------------------
-      onStatusUpdate?.call('Creating payment intent ($amountInCents¢)...');
+      onStatusUpdate?.call('Initialisation du paiement ($amountInCents¢)...');
       
+      // Payment intent
       final intentResponse = await _client.post(
         Uri.parse(AppConstants.paymentIntentsEndpoint),
         headers: {
@@ -56,11 +58,13 @@ class StripeService {
         },
       );
 
+      //Catch intent error
       if (intentResponse.statusCode != 200) {
         final errorBody = jsonDecode(intentResponse.body);
-        throw Exception('Impossible de créer le paiement: ${errorBody['error']?['message'] ?? intentResponse.body}');
+        throw Exception('Impossible d\'initier le paiement: ${errorBody['error']?['message'] ?? intentResponse.body}');
       }
 
+      //catch intent data
       final intentData = jsonDecode(intentResponse.body);
       final String intentId = intentData['id'];
       onStatusUpdate?.call('Paiement initialisé: $intentId');
@@ -70,6 +74,7 @@ class StripeService {
       // ----------------------------------------------------
       onStatusUpdate?.call('Connexion au terminal ($readerId)...');
       
+      //activate reader
       final processUrl = AppConstants.processPaymentEndpoint(readerId);
       final processResponse = await _client.post(
         Uri.parse(processUrl),
@@ -82,6 +87,7 @@ class StripeService {
         },
       );
 
+      //catch reader activation error
       if (processResponse.statusCode != 200) {
         final errorBody = jsonDecode(processResponse.body);
         throw Exception('Connexion au terminal échouée: ${errorBody['error']?['message'] ?? processResponse.body}');
@@ -89,10 +95,23 @@ class StripeService {
 
       onStatusUpdate?.call('Terminal activé. Presentez votre carte...');
 
+      //simulate payment with stripe
+      if(isTest){
+        final testPaymentUrl = AppConstants.simulateCardTap(readerId);
+        final presentSimulatedCard = await _client.post(
+          Uri.parse(testPaymentUrl),
+          headers: {
+            'Authorization': 'Bearer $secretKey',
+            'Content-Type': 'application/x-www-form-urlencoded',
+          }
+        );
+      }
+
+
       // ----------------------------------------------------
       // STEP 3: Poll PaymentIntent Status
       // ----------------------------------------------------
-      // We will poll the Stripe payment intent status every 2 seconds
+      // poll the Stripe payment intent status every 2 seconds
       // until it transitions out of processing/requires_payment_method states.
       final int maxPollAttempts = 30; // 60 seconds timeout
       for (int attempt = 0; attempt < maxPollAttempts; attempt++) {
@@ -157,25 +176,25 @@ class StripeService {
     double amount,
     void Function(String message)? onStatusUpdate,
   ) async {
-    onStatusUpdate?.call('Simulator: Bootstrapping localized offline payment...');
+    onStatusUpdate?.call('Simulation: Bootstrapping localized offline payment...');
     await Future.delayed(const Duration(milliseconds: 1000));
     
-    onStatusUpdate?.call('Simulator: Waking up Terminal Reader...');
+    onStatusUpdate?.call('Simulation: Activation du terminal...');
     await Future.delayed(const Duration(milliseconds: 1200));
     
-    onStatusUpdate?.call('Simulator: READER READY. Tap, insert or swipe card...');
+    onStatusUpdate?.call('Simulation: Terminal prêt. présentez la carte...');
     await Future.delayed(const Duration(milliseconds: 1800));
     
-    onStatusUpdate?.call('Simulator: Card detected! Authorizing payment...');
+    onStatusUpdate?.call('Simulation: Carte détectée! Vérification en cours...');
     await Future.delayed(const Duration(milliseconds: 1500));
     
-    onStatusUpdate?.call('Simulator: Capturing charge ($amount)...');
+    onStatusUpdate?.call('Simulation: Enregistrement du paiement ($amount)...');
     await Future.delayed(const Duration(milliseconds: 800));
 
     return {
       'success': true,
       'intent_id': 'pi_mock_${DateTime.now().millisecondsSinceEpoch}',
-      'message': 'Simulateur: Paiement approuvé ;) (Mode hors ligne).',
+      'message': 'Simulation: Paiement approuvé ;) (Mode hors ligne).',
       'amount': amount,
     };
   }

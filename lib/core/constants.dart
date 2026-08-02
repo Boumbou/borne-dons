@@ -10,9 +10,16 @@ class AppConstants {
   static const String stripeBaseUrl = 'https://api.stripe.com/v1';
   static const String paymentIntentsEndpoint = '$stripeBaseUrl/payment_intents';
   
+  // --- Sumup API Endpoints ---
+  static const String sumupBaseUrl = 'https://api.sumup.com/v0.1/merchants';
+  
   /// Formats the Stripe Terminal Reader process payment intent URL.
   static String processPaymentEndpoint(String readerId) => 
       '$stripeBaseUrl/terminal/readers/$readerId/process_payment_intent';
+  
+  /// Formats the Stripe Test Helper payment intent URL.
+  static String simulateCardTap(String readerId) => 
+      '$stripeBaseUrl/test_helpers/terminal/readers/$readerId/present_payment_method';
 
   /// Formats the Stripe Terminal Reader capture/retrieve URL for polling.
   static String readerEndpoint(String readerId) =>
@@ -20,7 +27,7 @@ class AppConstants {
 
   // --- Quick Select Amounts ---
   // Represented in dollars (will be converted to cents for Stripe API)
-  static const List<double> quickAmounts = [5.0, 10.0, 20.0, 30.0, 50.0];
+  static const List<double> quickAmounts = [10.0, 20.0, 30.0, 40.0, 50.0];
 
   // --- Shadcn-Style Slate Color Palette ---
   // Minimalist, high-contrast colors mirroring a professional slate-based theme.
@@ -51,5 +58,5 @@ class AppConstants {
   static const Color error = Color(0xFFEF4444); // red-500
   
   // --- Asset Paths ---
-  static const String backgroundPattern = 'assets/pattern-background-normal.jpg';
+  static const String backgroundPattern = 'assets/background-pattern.png';
 }

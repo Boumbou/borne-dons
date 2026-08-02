@@ -12,13 +12,21 @@ import 'package:path/path.dart' as p;
 
 class StorageService {
   // --- Secure Storage Keys ---
+  static const String _keySumupApiKey = 'sumup_api_key';
+  static const String _keySumupAppId = 'sumup_app_id';
+  static const String _keySumupAfKey = 'sumup_affiliation_key';
+  static const String _keySumupMerchantCode = 'sumup_merchant_code';
+  static const String _keySumupPairingCode = 'sumup_pairing_code';
+  static const String _keySumupReaderId = 'sumup_reader_id';
   static const String _keyStripeSecret = 'stripe_secret_key';
   static const String _keyTerminalId = 'stripe_terminal_id';
   
   // --- Shared Preferences Keys ---
   static const String _keyLogoPath = 'company_logo_path';
+  static const String _keyBrandColor = 'brand_color';
   static const String _keyIsMockMode = 'pos_is_mock_mode';
   static const String _keyIsTestMode = 'pos_is_test_mode';
+  static const String _keyIsStripe = 'pos_is_stripe';
   static const String _keyAssociationName = 'association_name';
   static const String _keyShortText = 'short_text';
 
@@ -40,8 +48,59 @@ class StorageService {
     return StorageService(secureStorage: secureStorage, prefs: prefs);
   }
 
-  // --- Stripe Credentials Handling ---
 
+  // --- Sumup Credentials Handling ---
+  /// Reads the stored Sumup Merchant Code securely.
+  Future<String?> getSumupMerchantCode() async {
+    return await _secureStorage.read(key: _keySumupMerchantCode);
+  }
+  /// Writes the Sumup Merchant Code securely.
+  Future<void> setSumupMerchantCode(String merchantCode) async {
+    await _secureStorage.write(key: _keySumupMerchantCode, value: merchantCode);
+  }
+  /// Reads the stored Sumup Api Key securely.
+  Future<String?> getSumupApiKey() async {
+    return await _secureStorage.read(key: _keySumupApiKey);
+  }
+  /// Writes the Sumup Api Key securely.
+  Future<void> setSumupApiKey(String apiKey) async {
+    await _secureStorage.write(key: _keySumupApiKey, value: apiKey);
+  }
+  /// Reads the stored Sumup App Id securely.
+  Future<String?> getSumupAppId() async {
+    return await _secureStorage.read(key: _keySumupAppId);
+  }
+  /// Writes the Sumup Api Key securely.
+  Future<void> setSumupAppId(String id) async {
+    await _secureStorage.write(key: _keySumupAppId, value: id);
+  }
+  /// Reads the stored Sumup Api Key securely.
+  Future<String?> getSumupAfKey() async {
+    return await _secureStorage.read(key: _keySumupAfKey);
+  }
+  /// Writes the Sumup Api Key securely.
+  Future<void> setSumupAfKey(String key) async {
+    await _secureStorage.write(key: _keySumupAfKey, value: key);
+  }
+  /// Reads the stored Sumup Pairign Code securely.
+  Future<String?> getSumupPairingCode() async {
+    return await _secureStorage.read(key: _keySumupPairingCode);
+  }
+  /// Writes the Sumup Api Key securely.
+  Future<void> setSumupPairingCode(String pairingCode) async {
+    await _secureStorage.write(key: _keySumupPairingCode, value: pairingCode);
+  }
+  /// Reads the stored Sumup Pairign Code securely.
+  Future<String?> getSumupReaderId() async {
+    return await _secureStorage.read(key: _keySumupReaderId);
+  }
+  /// Writes the Sumup Api Key securely.
+  Future<void> setSumupReaderId(String id) async {
+    await _secureStorage.write(key: _keySumupReaderId, value: id);
+  }
+
+
+  // --- Stripe Credentials Handling ---
   /// Reads the stored Stripe Secret Key securely.
   Future<String?> getStripeSecretKey() async {
     return await _secureStorage.read(key: _keyStripeSecret);
@@ -60,6 +119,15 @@ class StorageService {
   /// Writes the Stripe Terminal Reader ID securely.
   Future<void> setTerminalId(String terminalId) async {
     await _secureStorage.write(key: _keyTerminalId, value: terminalId);
+  }
+
+  // --- Brand Color operations ---
+  int? getBrandColor(){
+    return _prefs.getInt(_keyBrandColor);
+  }
+
+  Future<bool> setBrandColor(int colorValue){
+    return _prefs.setInt(_keyBrandColor, colorValue);
   }
 
   // --- Company Logo Operations ---
@@ -105,6 +173,11 @@ class StorageService {
     return _prefs.getBool(_keyIsTestMode) ?? false;
   }
 
+  /// Check if the payment will be handle through Stripe or Sumup.
+  bool isStripe() {
+    return _prefs.getBool(_keyIsStripe) ?? false;
+  }
+
   /// Toggles mock reader simulation mode.
   Future<void> setMockMode(bool enabled) async {
     await _prefs.setBool(_keyIsMockMode, enabled);
@@ -112,6 +185,10 @@ class StorageService {
   /// Toggles test integration  mode.
   Future<void> setTestMode(bool enabled) async {
     await _prefs.setBool(_keyIsTestMode, enabled);
+  }
+  /// Toggles test integration  mode.
+  Future<void> setIsStripe(bool enabled) async {
+    await _prefs.setBool(_keyIsStripe, enabled);
   }
 
   // --- Association & Short Text Configuration ---
@@ -145,9 +222,15 @@ class StorageService {
     if (isMockMode()) {
       return true;
     }
-    final secret = await getStripeSecretKey();
-    final terminal = await getTerminalId();
-    return secret != null && secret.isNotEmpty && terminal != null && terminal.isNotEmpty;
+    if(isStripe()){
+      final secret = await getStripeSecretKey();
+      final terminal = await getTerminalId();
+      return secret != null && secret.isNotEmpty && terminal != null && terminal.isNotEmpty;
+    }else{
+      final sumupReaderId = await getSumupReaderId();
+      return sumupReaderId != null && sumupReaderId.isNotEmpty;
+
+    }
   }
 
   /// Clears all local configurations to support re-entering setup details.

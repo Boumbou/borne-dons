@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'core/constants.dart';
 import 'core/theme.dart';
 import 'services/storage_service.dart';
+import 'services/sumup_service.dart';
 import 'features/setup/setup_screen.dart';
 import 'features/payment/payment_screen.dart';
 
@@ -18,6 +19,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   StorageService? storage;
+  SumupService sumupService = new SumupService();
   bool isTerminalConfigured = false;
 
   try {
@@ -34,8 +36,8 @@ void main() async {
   runApp(StripePOSApp(
     storageService: storage,
     initialScreen: isTerminalConfigured
-        ? PaymentScreen(storageService: storage!)
-        : SetupScreen(storageService: storage!),
+        ? PaymentScreen(storageService: storage!, sumupService: sumupService)
+        : SetupScreen(storageService: storage!, sumupService: sumupService),
   ));
 }
 
@@ -52,7 +54,7 @@ class StripePOSApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Stripe Terminal POS',
+      title: 'Borne de dons',
       debugShowCheckedModeBanner: false,
       
       // Apply professional Shadcn visual theme custom specs
