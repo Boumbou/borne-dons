@@ -1,4 +1,4 @@
-name: Flutter Linux Builds
+name: Flutter Linux Builds 22.04
 
 on:
   # push:
