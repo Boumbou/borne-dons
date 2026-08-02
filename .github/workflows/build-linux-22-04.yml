@@ -1,0 +1,44 @@
+name: Flutter Linux Builds
+
+on:
+  # push:
+  #   branches:
+  #     - main # Triggers automatically when you push to main
+  workflow_dispatch: # Allows you to manually click a "Run" button in GitHub
+
+jobs:
+
+  # ==========================================
+  # LINUX BUILD JOB
+  # ==========================================
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-22.04
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Linux Build Requirements
+        # Linux requires these native C++ and GTK dependencies to compile Flutter
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsecret-1-dev
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Linux App
+        run: flutter build linux
+
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-release
+          # This folder contains the executable and required assets
+          path: build/linux/x64/release/bundle/
