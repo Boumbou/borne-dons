@@ -225,6 +225,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 800),
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Space for sticky top bar
                       const SizedBox(height: 94.0),

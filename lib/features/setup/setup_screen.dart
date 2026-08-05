@@ -432,50 +432,50 @@ class _SetupScreenState extends State<SetupScreen> {
                         // --- Dynamic Form Fields ---
                         if (!_isMockMode) ...[
                           // --- Is Stripe or Sumup Toggle ---
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                            decoration: BoxDecoration(
-                              color: const Color.fromARGB(255, 57, 61, 60),
-                              borderRadius: BorderRadius.circular(8.0),
-                              border: Border.all(color: AppConstants.border, width: 1.0),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Service de paiement',
-                                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accent),
-                                      ),
-                                      SizedBox(
-                                        height: 10.0,
-                                      ),
-                                      Image.asset(
-                                        _isStripe ? 'assets/hd-stripe-white-logo.png' : 'assets/Sumup_logo-white.png',
-                                        height: 30.0,
-                                      ),
-                                      // Text(
-                                      //   _isStripe ? 'Stripe' : 'Sumup',
-                                      //   style: TextStyle(fontSize: 18, color: AppConstants.accent, fontStyle: FontStyle.italic),
-                                      // ),
-                                    ],
-                                  ),
-                                ),
-                                Switch(
-                                  value: _isStripe,
-                                  activeColor: AppConstants.secondary,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _isStripe = value;
-                                    });
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24.0),
+                          // Container(
+                          //   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                          //   decoration: BoxDecoration(
+                          //     color: const Color.fromARGB(255, 57, 61, 60),
+                          //     borderRadius: BorderRadius.circular(8.0),
+                          //     border: Border.all(color: AppConstants.border, width: 1.0),
+                          //   ),
+                          //   child: Row(
+                          //     children: [
+                          //       Expanded(
+                          //         child: Column(
+                          //           crossAxisAlignment: CrossAxisAlignment.start,
+                          //           children: [
+                          //             Text(
+                          //               'Service de paiement',
+                          //               style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accent),
+                          //             ),
+                          //             SizedBox(
+                          //               height: 10.0,
+                          //             ),
+                          //             Image.asset(
+                          //               _isStripe ? 'assets/hd-stripe-white-logo.png' : 'assets/Sumup_logo-white.png',
+                          //               height: 30.0,
+                          //             ),
+                          //             // Text(
+                          //             //   _isStripe ? 'Stripe' : 'Sumup',
+                          //             //   style: TextStyle(fontSize: 18, color: AppConstants.accent, fontStyle: FontStyle.italic),
+                          //             // ),
+                          //           ],
+                          //         ),
+                          //       ),
+                          //       Switch(
+                          //         value: _isStripe,
+                          //         activeColor: AppConstants.secondary,
+                          //         onChanged: (value) {
+                          //           setState(() {
+                          //             _isStripe = value;
+                          //           });
+                          //         },
+                          //       ),
+                          //     ],
+                          //   ),
+                          // ),
+                          // const SizedBox(height: 24.0),
                           
                           // --- Integration test Toggle ---
                           Container(
@@ -524,14 +524,37 @@ class _SetupScreenState extends State<SetupScreen> {
                                 children:<Widget>[
                                   TabBar(
                                     indicatorWeight: 10.0,
-                                    indicatorColor: _brandColor,
+                                    indicatorColor: Color.lerp(_brandColor,Colors.black,0.2),
+                                    onTap: (index) {
+                                      if (index == 0) {
+                                        setState(() {
+                                          _isStripe = true;
+                                        });
+                                      } else if (index == 1) {
+                                        setState(() {
+                                          _isStripe = false;
+                                        });
+                                      }
+                                    },
                                     tabs: [
-                                      Tab(text: 'Stripe',),
-                                      Tab(text: 'Sumup')
+                                      Tab(
+                                        child: Image.asset(
+                                          'assets/hd-stripe-white-logo.png',
+                                          color: Color.lerp(_brandColor,Colors.black,0.2),
+                                          height: 30.0,
+                                        ),
+                                      ),
+                                      Tab(
+                                        child:Image.asset(
+                                          'assets/Sumup_logo-white.png',
+                                          color: Color.lerp(_brandColor,Colors.black,0.2),
+                                          height: 30.0,
+                                        ),
+                                      )
                                     ]
                                   ),
                                   SizedBox(
-                                    height: MediaQuery.of(context).size.height * 0.6,
+                                    height: _isStripe ? 250: 550 /*MediaQuery.of(context).size.height * 0.3*/,
                                     child:TabBarView(
                                       children: [
                                       //--- stripe config form ---

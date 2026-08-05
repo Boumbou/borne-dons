@@ -78,7 +78,7 @@ class _AmountGridState extends State<AmountGrid> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 400,
+            maxCrossAxisExtent: 500,
             mainAxisSpacing: 30.0,
             crossAxisSpacing: 30.0,
             childAspectRatio: 1.6,
@@ -94,23 +94,23 @@ class _AmountGridState extends State<AmountGrid> {
                     Icon(
                       Icons.credit_card_outlined,
                       color: _isCustomActive ? Colors.white : AppConstants.mutedForeground,
-                      size: 20,
+                      size: 60,
                     ),
                     const SizedBox(height: 4.0),
-                    const Text(
-                      'SAISIE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.0,
-                        color: AppConstants.mutedForeground,
-                      ),
-                    ),
+                    // const Text(
+                    //   'SAISIE',
+                    //   style: TextStyle(
+                    //     fontSize: 10,
+                    //     fontWeight: FontWeight.bold,
+                    //     letterSpacing: 1.0,
+                    //     color: AppConstants.mutedForeground,
+                    //   ),
+                    // ),
                     const SizedBox(height: 2.0),
                     Text(
                       'Autre Montant',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 36,
                         fontWeight: FontWeight.bold,
                         color: _isCustomActive ? Colors.white : AppConstants.foreground,
                       ),
@@ -127,20 +127,20 @@ class _AmountGridState extends State<AmountGrid> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'MONTANT',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppConstants.mutedForeground,
-                    ),
-                  ),
+                  // const Text(
+                  //   'MONTANT',
+                  //   style: TextStyle(
+                  //     fontSize: 10,
+                  //     fontWeight: FontWeight.bold,
+                  //     letterSpacing: 1.0,
+                  //     color: AppConstants.mutedForeground,
+                  //   ),
+                  // ),
                   const SizedBox(height: 10.0),
                   Text(
                     '${amount.toStringAsFixed(0)} €',
                     style: TextStyle(
-                      fontSize: 26,
+                      fontSize: 88,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
                       color: AppConstants.foreground,
