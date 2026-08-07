@@ -8,9 +8,11 @@ import '../../../core/constants.dart';
 
 class AmountGrid extends StatefulWidget {
   final Function(double amount) onAmountSelected;
+  final double buttonSize;
 
   const AmountGrid({
     Key? key,
+    required this.buttonSize,
     required this.onAmountSelected,
   }) : super(key: key);
 
@@ -78,7 +80,7 @@ class _AmountGridState extends State<AmountGrid> {
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 500,
+            maxCrossAxisExtent: 600,
             mainAxisSpacing: 30.0,
             crossAxisSpacing: 30.0,
             childAspectRatio: 1.6,

@@ -94,7 +94,7 @@ class CustomStepper extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
             color: labelColor,
           ),

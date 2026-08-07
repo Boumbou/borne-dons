@@ -200,6 +200,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -223,17 +225,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 800),
+                  constraints: BoxConstraints(maxWidth: screenWidth * 0.65),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 70,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Space for sticky top bar
-                      const SizedBox(height: 94.0),
+                      const SizedBox(height: 70.0),
 
                       // --- Placeholder for basmalah.png ---
                       Image.asset(
                         'assets/basmalah.png',
-                        height: 100,
+                        height: 200,
                         color:  
                           _isThemeDark! ? Colors.amber : Colors.amber[800],
                         fit: BoxFit.contain,
@@ -266,7 +269,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 16.0),
+                      // const SizedBox(height: 16.0),
 
                       // --- Short Description Text below Image ---
                       Padding(
@@ -275,14 +278,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           _shortText,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 22.0,
+                            fontSize: 46.0,
                             height: 1.4,
                             color:  _textColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 28.0),
+                      // const SizedBox(height: 28.0),
 
                       // --- Main Checkout Card containing presets ---
                       Card(
@@ -296,13 +299,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Padding(
                               padding: const EdgeInsets.all(28.0),
                               child: AmountGrid(
+                                buttonSize: screenWidth * 0.65 / 2,
                                 onAmountSelected: _isStripe || _isMockMode ? _initiateTerminalTransaction : _initiateSumupTransaction,
                               ),
                             ),
                       ),
 
                       // Space for sticky bottom stepper
-                      const SizedBox(height: 160.0),
+                      const SizedBox(height: 130.0),
                     ],
                   ),
                 ),
@@ -321,7 +325,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Container(
                   height: 74.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(0),
+                    color: Colors.white.withAlpha(50),
                     border: const Border(
                       bottom: BorderSide(color: AppConstants.border, width: 1.0),
                     ),
@@ -424,7 +428,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Container(
                   height: 120.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.01),
+                    color: Colors.white.withAlpha(75),
                     border: const Border(
                       top: BorderSide(color: AppConstants.border, width: 1.0),
                     ),
