@@ -170,22 +170,25 @@ class _SetupScreenState extends State<SetupScreen> {
           await widget.storageService.setStripeSecretKey(_secretKeyController.text.trim());
           await widget.storageService.setTerminalId(_terminalIdController.text.trim());
         }else{
+          final pairingCode = await widget.storageService.getSumupPairingCode();
           //sumup
-          try{
-            final String? readerId = await widget.sumupService.pairSumupSolo(
-              _sumupMerchantCodeController.text.trim(),
-              _sumupApiKeyController.text.trim(),
-              _sumupPairingCodeController.text.trim()
-            );
+          if(_sumupPairingCodeController.text.trim() != pairingCode.toString()){
+            try{
+              final String? readerId = await widget.sumupService.pairSumupSolo(
+                _sumupMerchantCodeController.text.trim(),
+                _sumupApiKeyController.text.trim(),
+                _sumupPairingCodeController.text.trim()
+              );
 
-            if (readerId == null){
-              throw Exception('Impossible de coupler le terminal...');
+              if (readerId == null){
+                throw Exception('Impossible de coupler le terminal...');
+              }
+
+              await widget.storageService.setSumupReaderId(readerId);
+            }catch(e){
+              print('error while pairing sumup: $e');
+              return;
             }
-
-            await widget.storageService.setSumupReaderId(readerId);
-          }catch(e){
-            print('error while pairing sumup: $e');
-            return;
           }
 
           await widget.storageService.setSumupApiKey(_sumupApiKeyController.text.trim());
@@ -496,7 +499,7 @@ class _SetupScreenState extends State<SetupScreen> {
                                         style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppConstants.accentForeground),
                                       ),
                                       Text(
-                                        'Teste votre integration avec un terminal de test.',
+                                        'Testez votre integration avec un terminal de test.',
                                         style: TextStyle(fontSize: 11, color: AppConstants.accentForeground),
                                       ),
                                     ],
