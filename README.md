@@ -1,5 +1,3 @@
-# Stripe Donation POS
-
 ## English translation at the bottom
 
 # Donation POS
@@ -85,7 +83,7 @@ lib/
 ---
 
 
-# Stripe Donation POS
+# Donation POS
 
 A minimal Flutter application designed for collecting donations via Stripe or Sumup Terminal. This project serves as a lightweight Point of Sale (POS) system that guides users through device setup and enables secure payment processing.
 
