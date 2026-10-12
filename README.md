@@ -52,7 +52,30 @@ lib/
 3. Remplissez les informations concernant votre association.
 4. Sélectionnez votre fournisseur de paiement.
 5. Entrez les clés requises
-6. Cliquez sur **Initialiser la borne**.
+   ### Où trouver les informations nécessaires sur Sumup :
+   1. Cliquer sur l'icone en haut à gauche pour pouvoir copier votre numéro commerçant
+   2. Ensuite ouvrez les paramètres et déscendez pour trouver la section **Développeurs**
+   3. Ouvrez la tab Clés APi et créez une nouvelle clé (la clé publique ne suffit pas)
+      **Nommez la et n'oubliez pas de la copier**
+   4. Ouvrez ensuite la tab Clés d'affiliation
+   5. Vous y trouverez votre clé d'affiliation
+   6. Il ne vous reste qu'à créer votre ID d'application 
+    #### Vous avez désormais votre numéro commerçant, votre clé api, votre ID d'application et votre clé d'affiliation
+
+    https://github.com/user-attachments/assets/9a551e37-7c1c-42b4-a8bd-73ce53c62404
+
+  ### Comment obtenir le pairing code sur le terminal Solo
+  1. Configurer le terminal pour le wifi et mettre à jour si besoin
+  2. Toucher et glisser vers le bas de l'écran
+  3. Sélectionner le mode Cloud API
+  4. saisir le code qui apparait dand l'application
+    
+  https://github.com/user-attachments/assets/9a4d710a-09d7-437c-9d88-4981a5127e6f
+
+
+
+
+7. Cliquez sur **Initialiser la borne**.
 
 ## ⚠️ Notes Importantes
 
