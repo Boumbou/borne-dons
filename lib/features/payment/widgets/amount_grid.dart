@@ -8,9 +8,11 @@ import '../../../core/constants.dart';
 
 class AmountGrid extends StatefulWidget {
   final Function(double amount) onAmountSelected;
+  final double buttonSize;
 
   const AmountGrid({
     Key? key,
+    required this.buttonSize,
     required this.onAmountSelected,
   }) : super(key: key);
 
@@ -69,6 +71,7 @@ class _AmountGridState extends State<AmountGrid> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.sizeOf(context).width * 0.9 / 2;
     return Stack(
       // crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -77,11 +80,12 @@ class _AmountGridState extends State<AmountGrid> {
           GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 400,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
             mainAxisSpacing: 30.0,
             crossAxisSpacing: 30.0,
             childAspectRatio: 1.6,
+
           ),
           itemCount: AppConstants.quickAmounts.length + 1,
           itemBuilder: (context, index) {
@@ -94,23 +98,23 @@ class _AmountGridState extends State<AmountGrid> {
                     Icon(
                       Icons.credit_card_outlined,
                       color: _isCustomActive ? Colors.white : AppConstants.mutedForeground,
-                      size: 20,
+                      size: MediaQuery.of(context).size.width * 0.1, // 8% of screen width,
                     ),
                     const SizedBox(height: 4.0),
-                    const Text(
-                      'SAISIE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.0,
-                        color: AppConstants.mutedForeground,
-                      ),
-                    ),
+                    // const Text(
+                    //   'SAISIE',
+                    //   style: TextStyle(
+                    //     fontSize: 10,
+                    //     fontWeight: FontWeight.bold,
+                    //     letterSpacing: 1.0,
+                    //     color: AppConstants.mutedForeground,
+                    //   ),
+                    // ),
                     const SizedBox(height: 2.0),
                     Text(
                       'Autre Montant',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: MediaQuery.of(context).size.width * 0.04, // 8% of screen width,
                         fontWeight: FontWeight.bold,
                         color: _isCustomActive ? Colors.white : AppConstants.foreground,
                       ),
@@ -127,25 +131,25 @@ class _AmountGridState extends State<AmountGrid> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'MONTANT',
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.0,
-                      color: AppConstants.mutedForeground,
-                    ),
-                  ),
+                  // const Text(
+                  //   'MONTANT',
+                  //   style: TextStyle(
+                  //     fontSize: 10,
+                  //     fontWeight: FontWeight.bold,
+                  //     letterSpacing: 1.0,
+                  //     color: AppConstants.mutedForeground,
+                  //   ),
+                  // ),
                   const SizedBox(height: 10.0),
                   Text(
                     '${amount.toStringAsFixed(0)} €',
                     style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
+                      fontSize: MediaQuery.of(context).size.width * 0.1, // 8% of screen width
+                      fontWeight: FontWeight.normal,
                       letterSpacing: -0.5,
                       color: AppConstants.foreground,
                     ),
-                  ),
+                  )
                 ],
               ),
               isSelected: false,
@@ -170,16 +174,16 @@ class _AmountGridState extends State<AmountGrid> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
-                      'Autre valeur',
+                    Text(
+                      'Autre montant',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: MediaQuery.of(context).size.width * 0.03, // 8% of screen width,
                         color: AppConstants.mutedForeground,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, size: 16, color: AppConstants.mutedForeground),
+                      icon: Icon(Icons.close, size: MediaQuery.of(context).size.width * 0.06, color: AppConstants.mutedForeground),
                       onPressed: () {
                         setState(() {
                           _isCustomActive = false;
@@ -201,9 +205,9 @@ class _AmountGridState extends State<AmountGrid> {
                   alignment: Alignment.centerRight,
                   child: Text(
                     _customAmountString.isEmpty ? '0.00 €' : '$_customAmountString €',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontFamily: 'monospace',
-                      fontSize: 32,
+                      fontSize: MediaQuery.of(context).size.width * 0.06, // 8% of screen width,
                       fontWeight: FontWeight.bold,
                       letterSpacing: -0.5,
                       color: AppConstants.foreground,
@@ -248,19 +252,19 @@ class _AmountGridState extends State<AmountGrid> {
                       child: Column(
                         children: [
                           _buildActionButton(
-                            label: 'CLEAR',
+                            label: 'Annuler',
                             color: Colors.red.shade50,
                             textColor: Colors.red.shade700,
                             onTap: () => _handleKeypadTap('C'),
-                            height: 60.0,
+                            height: MediaQuery.of(context).size.width * 0.2, // 8% of screen width,
                           ),
-                          const SizedBox(height: 10.0),
+                         SizedBox(height: 10.0),
                           _buildActionButton(
-                            label: 'VALIDER',
+                            label: 'Valider',
                             color: AppConstants.primary,
                             textColor: AppConstants.primaryForeground,
                             onTap: _submitCustomAmount,
-                            height: 110.0,
+                            height: MediaQuery.of(context).size.width * 0.2, // 8% of screen width,
                           ),
                         ],
                       ),
@@ -320,8 +324,8 @@ class _AmountGridState extends State<AmountGrid> {
           alignment: Alignment.center,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.width * 0.06, // 8% of screen width,
               fontWeight: FontWeight.w600,
               color: AppConstants.foreground,
             ),
@@ -358,7 +362,7 @@ class _AmountGridState extends State<AmountGrid> {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: MediaQuery.of(context).size.width * 0.02, // 8% of screen width,
               fontWeight: FontWeight.bold,
               color: textColor,
             ),

@@ -200,6 +200,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.sizeOf(context).width;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -223,16 +225,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Center(
                 child: Container(
-                  constraints: const BoxConstraints(maxWidth: 800),
+                  constraints: BoxConstraints(maxWidth: screenWidth * 0.85),
                   child: Column(
+                    spacing: MediaQuery.of(context).size.width * 0.03,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Space for sticky top bar
-                      const SizedBox(height: 94.0),
+                      SizedBox(height: MediaQuery.of(context).size.width * 0.15),
 
                       // --- Placeholder for basmalah.png ---
                       Image.asset(
                         'assets/basmalah.png',
-                        height: 100,
+                        height: MediaQuery.of(context).size.height * 0.2, // 8% of screen width,
                         color:  
                           _isThemeDark! ? Colors.amber : Colors.amber[800],
                         fit: BoxFit.contain,
@@ -265,7 +269,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           );
                         },
                       ),
-                      const SizedBox(height: 16.0),
+                      // const SizedBox(height: 16.0),
 
                       // --- Short Description Text below Image ---
                       Padding(
@@ -274,14 +278,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           _shortText,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                            fontSize: 22.0,
-                            height: 1.4,
+                            fontSize: MediaQuery.of(context).size.width * 0.06, // 8% of screen width,
+                            height: 1,
                             color:  _textColor,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 28.0),
+                      // const SizedBox(height: 28.0),
 
                       // --- Main Checkout Card containing presets ---
                       Card(
@@ -295,13 +299,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             Padding(
                               padding: const EdgeInsets.all(28.0),
                               child: AmountGrid(
+                                buttonSize: screenWidth * 0.65 / 2,
                                 onAmountSelected: _isStripe || _isMockMode ? _initiateTerminalTransaction : _initiateSumupTransaction,
                               ),
                             ),
                       ),
 
                       // Space for sticky bottom stepper
-                      const SizedBox(height: 160.0),
+                      const SizedBox(height: 130.0),
                     ],
                   ),
                 ),
@@ -318,14 +323,14 @@ class _PaymentScreenState extends State<PaymentScreen> {
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                 child: Container(
-                  height: 74.0,
+                  height: MediaQuery.of(context).size.width * 0.15,
                   decoration: BoxDecoration(
-                    color: Colors.white.withAlpha(0),
+                    color: Colors.white.withAlpha(180),
                     border: const Border(
                       bottom: BorderSide(color: AppConstants.border, width: 1.0),
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.07),
                   child: SafeArea(
                     bottom: false,
                     child: Row(
@@ -336,8 +341,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           behavior: HitTestBehavior.opaque,
                           child:
                             Container(
-                              height: 38,
-                              width: 38,
+                              height: MediaQuery.of(context).size.width * 0.07, // 8% of screen width,
+                              width: MediaQuery.of(context).size.width * 0.07,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(6.0),
@@ -351,27 +356,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   : const Icon(Icons.favorite_outline, color: AppConstants.primary, size: 20),
                             )
                         ),
-                        const SizedBox(width: 12.0),
+                        // const SizedBox(width: 12.0),
 
                         // Association Title / Subtitle
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 _associationName,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
+                                style: TextStyle(
+                                  fontSize: MediaQuery.of(context).size.width * 0.05,
+                                  fontWeight: FontWeight.w600,
                                   letterSpacing: -0.3,
                                   color: AppConstants.foreground,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              const SizedBox(height: 2.0),
                               Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(
                                     width: 6,
@@ -383,9 +388,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                                   ),
                                   const SizedBox(width: 4.0),
                                   Text(
-                                    _isMockMode ? 'MOCK SIMULATOR' : _isTestMode ? 'INTEGRATION TEST': 'READER CONNECTED',
+                                    _isMockMode ? 'MODE SIMULATEUR' : _isTestMode ? 'MODE TEST': 'TERMINAL EN LIGNE',
                                     style: TextStyle(
-                                      fontSize: 9,
+                                      fontSize: MediaQuery.of(context).size.width * 0.01,
                                       fontWeight: FontWeight.bold,
                                       letterSpacing: 0.2,
                                       color: _isMockMode ? Colors.orange : AppConstants.success,
@@ -423,7 +428,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                 child: Container(
                   height: 120.0,
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.01),
+                    color: Colors.white.withAlpha(180),
                     border: const Border(
                       top: BorderSide(color: AppConstants.border, width: 1.0),
                     ),

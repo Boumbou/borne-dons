@@ -66,7 +66,7 @@ class CustomStepper extends StatelessWidget {
 
     final Color labelColor = isActive ? AppConstants.foreground : AppConstants.mutedForeground;
 
-    return Row(
+    return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         AnimatedContainer(
@@ -90,11 +90,11 @@ class CustomStepper extends StatelessWidget {
                   ),
                 ),
         ),
-        const SizedBox(width: 8.0),
+        const SizedBox(height: 8.0),
         Text(
           label,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
             color: labelColor,
           ),
